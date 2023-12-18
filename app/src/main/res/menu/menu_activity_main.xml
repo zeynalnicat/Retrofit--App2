@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/productsFragment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:icon="@drawable/img"
+        android:iconTint="#04364C"
+        android:title="Products" />
+    <item
+        android:id="@+id/accountFragment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:icon="@drawable/img_1"
+        android:iconTint="#04364C"
+        android:title="Account" />
+</menu>
