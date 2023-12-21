@@ -19,16 +19,16 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import retrofit2.Retrofit
 
 class LoginFragment : Fragment() {
     private lateinit var binding: FragmentLoginBinding
-    private var retrofit: UserApi? = null
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentLoginBinding.inflate(inflater)
-        retrofit = RetrofitInstance.userApi
+
         val activity = activity as MainActivity
         activity.setBottomNavigation(false)
         login()
@@ -49,8 +49,9 @@ class LoginFragment : Fragment() {
             val username = binding.edtUsername.text.toString()
             val password = binding.edtPassword.text.toString()
             CoroutineScope(Dispatchers.IO).launch {
-                val response = retrofit?.getToken(LoginRequest(username, password))
-                if (response != null && response.isSuccessful) {
+                val retrofit = RetrofitInstance.userApi
+                val response = retrofit.getToken(LoginRequest(username, password))
+                if (response.isSuccessful) {
                     val token = response.body()?.token
                     val sPreference =
                         activity?.getSharedPreferences(

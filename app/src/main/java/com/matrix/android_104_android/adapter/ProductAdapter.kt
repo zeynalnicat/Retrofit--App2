@@ -3,15 +3,30 @@ package com.matrix.android_104_android.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.AsyncListDiffer
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.matrix.android_104_android.databinding.ItemProductBinding
 import com.matrix.android_104_android.model.product.Product
-import com.matrix.android_104_android.model.product.Products
 
 
-class ProductAdapter(private val products: Products) :
+
+class ProductAdapter() :
     RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
+
+    var diffCallBack = object:DiffUtil.ItemCallback<Product>(){
+        override fun areItemsTheSame(oldItem: Product, newItem: Product): Boolean {
+            return oldItem.id == newItem.id
+        }
+
+        override fun areContentsTheSame(oldItem: Product, newItem: Product): Boolean {
+            return oldItem == newItem
+        }
+
+    }
+
+    val diffUtil = AsyncListDiffer(this,diffCallBack)
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductViewHolder {
@@ -21,11 +36,11 @@ class ProductAdapter(private val products: Products) :
     }
 
     override fun getItemCount(): Int {
-        return products.products.size
+        return diffUtil.currentList.size
     }
 
     override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {
-        return holder.bind(products.products[position])
+        return holder.bind(diffUtil.currentList[position])
     }
 
     inner class ProductViewHolder(private val binding: ItemProductBinding) :
@@ -42,4 +57,7 @@ class ProductAdapter(private val products: Products) :
         }
     }
 
+    fun submitList(products: List<Product>){
+        diffUtil.submitList(products)
+    }
 }

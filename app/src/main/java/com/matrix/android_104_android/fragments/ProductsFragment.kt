@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.matrix.android_104_android.MainActivity
 import com.matrix.android_104_android.adapter.ProductAdapter
@@ -34,9 +35,8 @@ class ProductsFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
         binding = FragmentProductsBinding.inflate(layoutInflater)
-
-        retrofit = RetrofitInstance.productApi
         getToken()
+        setRetrofit()
         setSpinner()
         setAdapter()
         val activity = activity as MainActivity
@@ -45,15 +45,21 @@ class ProductsFragment : Fragment() {
 
     }
 
+    private fun setRetrofit() {
+        retrofit = RetrofitInstance.getProductApi(token)
+    }
+
     private fun getToken() {
         val sharedPreference = activity?.getSharedPreferences("userDetails", Context.MODE_PRIVATE)
         token = sharedPreference?.getString("token", "").toString()
+
     }
 
     private fun setSpinner() {
+
         val spinner = binding.spinner
         CoroutineScope(Dispatchers.IO).launch {
-            val categoriesResponse = retrofit?.getCategories(token)
+            val categoriesResponse = retrofit?.getCategories()
             val categories = categoriesResponse?.body()
 
 
@@ -81,38 +87,51 @@ class ProductsFragment : Fragment() {
                         override fun onNothingSelected(p0: AdapterView<*>?) {
                         }
                     }
+                } else {
+                    Toast.makeText(
+                        requireContext(),
+                        "There was a problem in fetching categories, Please log in again",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }
     }
 
-
     private fun setAdapter() {
         CoroutineScope(Dispatchers.IO).launch {
             var productsResponse: Response<Products>?
-
             if (selectedCategory == "All categories") {
-                productsResponse = retrofit?.getProducts(token)
-            } else {
-                productsResponse = retrofit?.getSpecific(selectedCategory, token)
-            }
+                productsResponse = retrofit?.getProducts()
 
+
+            } else {
+                productsResponse = retrofit?.getSpecific(selectedCategory)
+            }
 
             Log.i("products", productsResponse.toString())
             val products = productsResponse?.body()
-
 
             withContext(Dispatchers.Main) {
                 if (products?.products?.size == 0) {
                     binding.progressBar.visibility = View.VISIBLE
                 }
-                products?.let {
-                    binding.progressBar.visibility = View.GONE
-                    adapter = ProductAdapter(it)
-                    binding.recyclerView.layoutManager = LinearLayoutManager(binding.root.context)
-                    binding.recyclerView.adapter = adapter
-                }
 
+                if (productsResponse?.isSuccessful == true) {
+                    products?.let {
+                        binding.progressBar.visibility = View.GONE
+                        adapter = ProductAdapter()
+                        adapter!!.submitList(it.products)
+                        binding.recyclerView.layoutManager =LinearLayoutManager(binding.root.context)
+                        binding.recyclerView.adapter = adapter
+                    }
+                } else {
+                    Toast.makeText(
+                        requireContext(),
+                        "There was a problem in fetching products, Please log in again",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
 
             }
         }

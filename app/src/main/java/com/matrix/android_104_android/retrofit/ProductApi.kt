@@ -9,15 +9,14 @@ import retrofit2.http.Path
 interface ProductApi {
 
     @GET("auth/products")
-    suspend fun getProducts(@Header("Authorization") token: String): Response<Products>
+    suspend fun getProducts(): Response<Products>
 
     @GET("auth/products/categories")
-    suspend fun getCategories(@Header("Authorization") token: String): Response<List<String>>
+    suspend fun getCategories(): Response<List<String>>
 
     @GET("auth/products/category/{category}")
     suspend fun getSpecific(
-        @Path("category") category: String,
-        @Header("Authorization") token: String
+        @Path("category") category: String
     ): Response<Products>
 
 }
